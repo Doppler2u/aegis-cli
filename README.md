@@ -56,12 +56,6 @@ You will need the following system software installed on your machine:
     sudo apt-get update && sudo apt-get install -y docker.io
     ```
   - **Windows/Mac:** [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- **Aptos CLI**: Required for compiling and deploying the smart contract. *(Source: [Aptos Official Docs](https://aptos.dev/en/tools/aptos-cli))*
-  - **Mac/Linux:** 
-    ```bash
-    curl -fsSL "https://aptos.dev/scripts/install_cli.py" | python3
-    ```
-  - **Windows:** Download the pre-compiled binary from the [Aptos CLI Releases](https://github.com/aptos-labs/aptos-core/releases).
 
 ### 2. Wallet Setup & Faucets
 You need an Aptos wallet address (e.g., Petra Wallet) funded with testnet tokens.

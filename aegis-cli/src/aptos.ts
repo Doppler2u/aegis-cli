@@ -9,7 +9,9 @@ const aptosConfig = new AptosConfig({
 });
 export const aptos = new Aptos(aptosConfig);
 
-export const MODULE_ADDRESS = process.env.CONTRACT_ADDRESS || process.env.APTOS_ADDRESS;
+// This is the global address where the Aegis smart contract was deployed.
+// Everyone in the world uses this same contract logic to create their own registries!
+export const MODULE_ADDRESS = "0xc1f9322e7f366e1d1ffc3e581fdb19ddbc023a581e6e4d98f2517c805d6e2612";
 export const MODULE_NAME = "registry";
 
 export async function initRepository(signer: Account) {

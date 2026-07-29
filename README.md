@@ -8,33 +8,7 @@ It allows you to securely encrypt and publish Docker images to a decentralized n
 - **Shelbynet (Storage)**: The Shelby network acts as a decentralized hard drive. It blindly stores encrypted Docker images (blobs) with sub-second retrieval latency.
 - **Aptos Smart Contracts (Logic)**: Our custom `registry.move` smart contract acts as the access control layer. It stores the AES master keys securely on-chain and maps them to authorized wallet addresses.
 
-```mermaid
-sequenceDiagram
-    participant Owner
-    participant CLI as Aegis CLI
-    participant Aptos as Aptos Smart Contract (Logic)
-    participant Shelby as Shelby Protocol (Storage)
-
-    Owner->>CLI: aegis push <image>
-    CLI->>CLI: Encrypt image with AES Master Key
-    CLI->>Shelby: Upload encrypted blob
-    Shelby-->>CLI: Return Blob ID
-    CLI->>Aptos: Publish (Tag, Blob ID, Image Digest)
-    
-    Owner->>CLI: aegis grant <Friend's Address>
-    CLI->>Aptos: Save encrypted AES Key for Friend
-    
-    Note over Owner,Shelby: --- Friend pulls the image ---
-    
-    participant Friend
-    Friend->>CLI: aegis pull <Owner's Address> <image>
-    CLI->>Aptos: Request Blob ID & AES Key
-    Aptos-->>CLI: Authenticate & Return Key (if authorized)
-    CLI->>Shelby: Download Blob using Blob ID
-    Shelby-->>CLI: Return encrypted blob
-    CLI->>CLI: Decrypt with AES Key
-    CLI->>Friend: Load image into local Docker
-```
+<img src="aegis-contract/public/achitecture.png" width="100%" alt="Architecture">
 
 ---
 
@@ -47,6 +21,7 @@ You will need the following system software installed on your machine:
   - **Ubuntu/Linux (via NVM):** 
     ```bash
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    source ~/.bashrc
     nvm install 18
     ```
   - **Windows/Mac:** [Download Node.js](https://nodejs.org/)
@@ -67,14 +42,17 @@ Because this project runs on **Shelbynet**, you will need both APT (for gas) and
 Clone the repository and install the CLI dependencies:
 ```bash
 git clone https://github.com/Doppler2u/aegis-cli.git
-cd aegis-cli
+cd aegis-cli/aegis-cli
 npm install
 ```
+> [!WARNING]
+> **WSL Users:** If you get an `esbuild` or `cmd.exe` error during `npm install`, your Ubuntu terminal is accidentally using the Windows version of Node. To fix this, either run the installation in a standard **Windows PowerShell** terminal, or install Linux Node natively in your WSL using the `nvm` commands listed in the Prerequisites above!
 
 ### 4. Environment Variables
 Copy the example environment file and fill in your details:
 ```bash
 cp .env.example .env
+nano .env
 ```
 Inside `.env`, set your `APTOS_PRIVATE_KEY` and `APTOS_ADDRESS` to your funded testnet wallet.
 
@@ -83,17 +61,27 @@ Inside `.env`, set your `APTOS_PRIVATE_KEY` and `APTOS_ADDRESS` to your funded t
 ## 🛠️ Usage
 
 ### Initialize the Repository
-Deploy the smart contract (if not already deployed), and initialize your repository on the blockchain:
+Initialize your secure registry on the blockchain. You only need to run this once per wallet address:
 ```bash
 npx tsx src/index.ts init
 ```
 
 ### Push a Docker Image
-Build your image locally, then encrypt and push it to the decentralized network:
+If you don't have an image to test with, download a tiny test image from Docker Hub first:
 ```bash
-npx tsx src/index.ts push <your-image-tag:latest>
+docker pull alpine:latest
+```
+
+> [!TIP]
+> **Docker Permission Denied?** If you are on Linux or WSL and get a `permission denied ... docker.sock` error, run `sudo chmod 666 /var/run/docker.sock` to quickly grant your terminal access to Docker!
+
+Encrypt your local Docker image and push it to the Shelby network:
+```bash
+npx tsx src/index.ts push alpine:latest
 ```
 *This command will automatically generate an AES master key, encrypt the Docker image, upload it to Shelby storage, and map the blob ID to your smart contract.*
+
+<img src="aegis-contract/public/push_tx.png" width="100%" alt="Push Transaction Screenshot">
 
 ### Grant Access
 Want to share your proprietary image with a friend or colleague? Grant their wallet address access:
@@ -102,12 +90,16 @@ npx tsx src/index.ts grant <FRIENDS_APTOS_ADDRESS>
 ```
 *This securely stores your encrypted AES master key on the Aptos blockchain, allowing only their specific private key to retrieve it.*
 
+<img src="aegis-contract/public/grant_tx.png" width="100%" alt="Grant Transaction Screenshot">
+
 ### Pull a Docker Image
 To download an image, the user must have their private key in their `.env` file and they must have been granted access by the owner:
 ```bash
-npx tsx src/index.ts pull <OWNERS_APTOS_ADDRESS> <image-tag:latest>
+npx tsx src/index.ts pull <repo-owner-address> alpine:latest
 ```
 *This command reads the smart contract, retrieves the blob ID, downloads the encrypted file from Shelby, decrypts it locally, verifies the SHA-256 integrity, and instantly loads it into the local Docker daemon.*
+
+<img src="aegis-contract/public/access_pull.png" width="100%" alt="Pull Transaction Screenshot">
 
 ---
 

@@ -6,11 +6,7 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 // Ensure environment variables are loaded
-const apiKey = process.env.SHELBY_API_KEY;
-if (!apiKey) {
-  console.error("SHELBY_API_KEY is missing from .env");
-  process.exit(1);
-}
+const apiKey = process.env.SHELBY_API_KEY || undefined;
 
 const client = new ShelbyNodeClient({
   network: Network.SHELBYNET,

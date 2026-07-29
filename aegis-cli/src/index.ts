@@ -2,6 +2,9 @@
 import { Command } from "commander";
 import { Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk";
 import * as crypto from "crypto";
+if (!globalThis.crypto) {
+  globalThis.crypto = crypto.webcrypto as any;
+}
 import { promises as fs } from "fs";
 import * as path from "path";
 import "dotenv/config";

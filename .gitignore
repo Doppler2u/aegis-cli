@@ -1,0 +1,11 @@
+# Ignore the tutorial boilerplate
+shelby-quickstart/
+
+# Global ignores for the whole project
+node_modules/
+dist/
+.env
+master_key.txt
+*.bin
+downloaded_*.bin
+encrypted_*.bin

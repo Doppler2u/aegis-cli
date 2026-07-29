@@ -1,0 +1,11 @@
+[package]
+name = "aegis"
+version = "1.0.0"
+
+[addresses]
+aegis = "0xc1f9322e7f366e1d1ffc3e581fdb19ddbc023a581e6e4d98f2517c805d6e2612"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
